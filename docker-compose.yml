@@ -1,0 +1,39 @@
+version: '3.7'
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+services:
+  ###########################################################
+  ## PROMETHEUS
+  ###########################################################
+  prometheus:
+    image: prom/prometheus:v2.30.3
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - 3000:9090
+  ###########################################################
+  ## Push Gateway
+  ###########################################################
+  pushgateway:
+    image: prom/pushgateway:v1.4.3
+    container_name: pushgateway
+    restart: unless-stopped
+    ports:
+      - 3001:9091
+  ###########################################################
+  ## GRAFANA
+  ###########################################################
+  grafana:
+    image: grafana/grafana-enterprise:8.2.0
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=strong-password
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - 3002:3000
+  
